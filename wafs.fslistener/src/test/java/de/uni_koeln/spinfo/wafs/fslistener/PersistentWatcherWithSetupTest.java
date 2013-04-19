@@ -82,6 +82,9 @@ public class PersistentWatcherWithSetupTest {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		for (File file : toDelete) {
 			System.out.println();

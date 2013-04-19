@@ -45,6 +45,18 @@ import de.uni_koeln.spinfo.wafs.fslistener.data.PersistentFile;
 import de.uni_koeln.spinfo.wafs.fslistener.data.PersistentFileObject;
 import de.uni_koeln.spinfo.wafs.fslistener.data.UnknownFSObject;
 
+/**
+ * This class is basically a wrapper around the Watch Service API introduced in Java 7
+ * (see http://docs.oracle.com/javase/tutorial/essential/io/notification.html). 
+ * 
+ * The most important enhancement is that this class keeps track of all files in a
+ * directory, such that it can inform about modifications which happened while the
+ * service was not running.
+ * 
+ *  
+ * @author sschwieb
+ *
+ */
 public class PersistentWatcher {
 
 	private File baseDir;
@@ -78,6 +90,22 @@ public class PersistentWatcher {
 	
 	private boolean modified = false;
 	
+	/**
+	 * Creates a new Persistent Watcher service for the dir <code>baseDir</code>. All
+	 * listeners will immediately be informed about changes on the file system, as long
+	 * as the modified file is accepted by the defined {@link FileFilter}.
+	 * 
+	 * If <code>db</code> points to an existing database, it will be loaded automatically,
+	 * and the given {@link FileEventListener}s will be informed about deletions and modifications
+	 * which might have occurred while the service was not running.
+	 * 
+	 * @param baseDir The directory to watch (including sub-directories). Must not be <code>null</code> and must be an existing directory.
+	 * @param db The database file to use. Must not be <code>null</code>.
+	 * @param acceptFilter a {@link FileFilter} which decides wether or not to propagate a {@link FileEvent}
+	 * @param listeners one or more {@link FileEventListener} which will be informed about changes in the directory
+	 * @throws CorruptDBException
+	 * @throws IOException
+	 */
 	public PersistentWatcher(File baseDir, File db, FileFilter acceptFilter, FileEventListener... listeners) throws CorruptDBException, IOException {
 		if(baseDir == null || !baseDir.exists() || !baseDir.isDirectory()) {
 			throw new IOException("Parameter 'baseDir' must be an existing directory!");
@@ -108,6 +136,12 @@ public class PersistentWatcher {
 		this.acceptFilter = acceptFilter;
 		this.listeners = listeners;
 		Path dir = Paths.get(baseDir.toURI());
+		
+		startPersistService();
+		logger.info("Starting watch service...");
+		startWatchService(dir);
+		
+		logger.info("Detecting deleted files...");
 		List<File> deleted = checkForDeletions(root);
 		for (File file : deleted) {
 			try {
@@ -115,13 +149,31 @@ public class PersistentWatcher {
 				root.remove(object);
 				fireEvent(object, Type.DELETED);
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.warn("Ignoring invalid URL ", e);
 			}
 		}
-		startPersistService();
-		logger.info("Starting watch service...");
-		startWatchService(dir);
+		
+		logger.info("Detecting modified files...");
+		List<File> modified = checkForModifications(root);
+		for (File file : modified) {
+			try {
+				PersistentFileObject object = null;
+				if(file.isFile()) {
+					object = new PersistentFile();
+					object.setPath(file.toURI());
+					object.setLastModified(file.lastModified());
+				} else {
+					object = new PersistentDir();
+					object.setPath(file.toURI());
+					object.setLastModified(file.lastModified());
+				}
+				root.updateTimeStamp(file.toURI(), file.lastModified());
+				fireEvent(object, Type.MODIFIED);
+			} catch (URISyntaxException e) {
+				logger.warn("Ignoring invalid URL ", e);
+			}
+		}
+		
 	}
 
 	private List<File> checkForDeletions(PersistentDir parent) {
@@ -133,6 +185,21 @@ public class PersistentWatcher {
 			}
 			File f = new File(child.getPath());
 			if(!f.exists()) {
+				toReturn.add(f);
+			}
+		}
+		return toReturn;
+	}
+	
+	private List<File> checkForModifications(PersistentDir parent) {
+		Collection<? extends PersistentFileObject> children = parent.getChildObjects();
+		List<File> toReturn = new ArrayList<>();
+		for (PersistentFileObject child : children) {
+			if(child instanceof PersistentDir) {
+				toReturn.addAll(checkForModifications((PersistentDir) child));
+			}
+			File f = new File(child.getPath());
+			if(f.exists() && f.lastModified() > child.getLastModified()) {
 				toReturn.add(f);
 			}
 		}
@@ -400,7 +467,14 @@ public class PersistentWatcher {
 		}
     }
 
-	public void shutdown(long timeout) throws InterruptedException {
+    /**
+     * This method must be called to shutdown the service. It will stop propagating new change
+     * events, and finally store the current state of the watch folder.
+     * @param timeout the time to wait for the internally used event queue, in milliseconds.
+     * @throws InterruptedException if the event service was interrupted while awaiting termination
+     * @throws IOException if an IO-error occurs 
+     */
+	public void shutdown(long timeout) throws InterruptedException, IOException {
 		logger.info("Shutting down...");
 		stopped = true;
 		synchronized(root) {
@@ -409,11 +483,11 @@ public class PersistentWatcher {
 				boolean success = eventService.awaitTermination(timeout, TimeUnit.MILLISECONDS);
 				logger.info("Event service shutdown friendly: " + success + ", storing data...");
 			} finally {
-				try {
-					storeDB();
-				} catch (JAXBException | IOException e) {
-					logger.error("Failed to store data!", e);
-				}
+					try {
+						storeDB();
+					} catch (JAXBException e) {
+						throw new IOException("Failed to store database", e);
+					}
 				logger.info("Shutdown completed");
 			}
 		}
