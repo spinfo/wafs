@@ -79,6 +79,12 @@ public class Usage {
 					// TODO: Check if file is already indexed, add if not
 					return true;
 				}
+
+				@Override
+				public boolean updateRequired(URI path, long lastModified) {
+					// TODO Auto-generated method stub
+					return true;
+				}
 			}, false);
 			
 		} catch (Exception e) {

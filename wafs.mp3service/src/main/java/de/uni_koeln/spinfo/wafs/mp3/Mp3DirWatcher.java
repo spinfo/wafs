@@ -181,6 +181,7 @@ public class Mp3DirWatcher {
 		try {
 			watcher = new PersistentWatcher(directory, dbFile, acceptFilter,
 					listener);
+			services.put(directory, watcher);
 		} catch (CorruptDBException e) {
 			logger.warn("Deleting corrupt database...");
 			dbFile.delete();
@@ -311,7 +312,11 @@ public class Mp3DirWatcher {
 			@Override
 			public boolean visit(PersistentFile file) {
 				try {
-					return visitor.visit(update(new File(file.getPath())));
+					if(visitor.updateRequired(file.getPath(), file.getLastModified())) {
+						return visitor.visit(update(new File(file.getPath())));	
+					} else {
+						return true;
+					}
 				} catch (Mp3Exception e) {
 					return !stopOnError;
 				}
