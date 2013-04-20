@@ -517,21 +517,25 @@ public class PersistentWatcher {
 	 */
 	public boolean visitKnownFiles(FileVisitor fileVisitor) {
 		synchronized (root) {
-			Collection<? extends PersistentFileObject> children = root.getChildObjects();
-			for (PersistentFileObject child : children) {
-				if(child instanceof PersistentFile) {
-					if(!fileVisitor.visit((PersistentFile) child)) {
-						return false;
-					}
-				} else {
-					boolean shouldContinue = visitKnownFiles(fileVisitor);
-					if(!shouldContinue) {
-						return false;
-					}
+			return visitKnownFiles(fileVisitor, root);
+		}
+	}
+
+	private boolean visitKnownFiles(FileVisitor fileVisitor, PersistentDir root) {
+		Collection<? extends PersistentFileObject> children = root.getChildObjects();
+		for (PersistentFileObject child : children) {
+			if(child instanceof PersistentFile) {
+				if(!fileVisitor.visit((PersistentFile) child)) {
+					return false;
+				}
+			} else {
+				boolean shouldContinue = visitKnownFiles(fileVisitor, (PersistentDir) child);
+				if(!shouldContinue) {
+					return false;
 				}
 			}
-			return true;
 		}
+		return true;
 	}
 
 }
