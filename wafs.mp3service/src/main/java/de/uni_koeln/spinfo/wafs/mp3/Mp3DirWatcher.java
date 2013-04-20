@@ -74,10 +74,18 @@ public class Mp3DirWatcher {
 			File file = new File(event.getObject().getPath());
 			switch (event.getType()) {
 			case MODIFIED:
-			case ADDED:
 				try {
 					if(file.isFile()) {
 						eventQueue.submit(new UpdateTask(update(file)));
+					}
+				} catch (Mp3Exception e) {
+					logger.error("Skipping file " + file, e);
+				}
+				break;
+			case ADDED:
+				try {
+					if(file.isFile()) {
+						eventQueue.submit(new AddTask(update(file)));
 					}
 				} catch (Mp3Exception e) {
 					logger.error("Skipping file " + file, e);
@@ -120,6 +128,21 @@ public class Mp3DirWatcher {
 		@Override
 		public void run() {
 			changeHandler.update(track);
+		}
+
+	}
+	
+	class AddTask implements Runnable {
+
+		private Track track;
+
+		public AddTask(Track track) {
+			this.track = track;
+		}
+
+		@Override
+		public void run() {
+			changeHandler.add(track);
 		}
 
 	}

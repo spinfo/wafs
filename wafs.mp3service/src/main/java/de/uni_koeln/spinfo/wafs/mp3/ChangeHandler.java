@@ -12,7 +12,7 @@ import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 public interface ChangeHandler {
 
 	/**
-	 * Called to save or update the given track.
+	 * Called to update the given track.
 	 * @param item
 	 */
 	void update(Track item);
@@ -22,5 +22,7 @@ public interface ChangeHandler {
 	 * @param file
 	 */
 	void deleted(File file);
+
+	void add(Track track);
 
 }

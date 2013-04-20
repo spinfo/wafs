@@ -46,6 +46,12 @@ public class Usage {
 			public void deleted(File file) {
 				logger.info("File deleted: " + file);
 			}
+
+			@Override
+			public void add(Track track) {
+				logger.info("Added track: " + track);
+				covers.storeCover(track);
+			}
 		};
 		
 		// b) initialize a directory service
