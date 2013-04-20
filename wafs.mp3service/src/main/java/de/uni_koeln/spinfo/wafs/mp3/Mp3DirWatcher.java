@@ -80,7 +80,7 @@ public class Mp3DirWatcher {
 						eventQueue.submit(new UpdateTask(update(file)));
 					}
 				} catch (Mp3Exception e) {
-					logger.error(e);
+					logger.error("Skipping file " + file, e);
 				}
 				break;
 			case DELETED:
@@ -101,6 +101,9 @@ public class Mp3DirWatcher {
 	 */
 	public Mp3DirWatcher(ChangeHandler handler,
 			FileFilter acceptFilter, File dbDir) {
+		if(!dbDir.exists()) {
+			dbDir.mkdirs();
+		}
 		this.changeHandler = handler;
 		this.acceptFilter = acceptFilter;
 		this.dbDir = dbDir;
