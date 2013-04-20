@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -252,10 +253,10 @@ public class PersistentWatcher {
 	}
 
 	private void fireEvent(PersistentFileObject object, Type type) {
+		final FileEvent event = new FileEvent(object, type);
 		synchronized (root) {
 			modified = true;
 		}
-		final FileEvent event = new FileEvent(object, type);
 		eventService.submit(new Runnable() {
 
 			@Override
@@ -292,6 +293,8 @@ public class PersistentWatcher {
 				        key = watcher.take();
 				    } catch (InterruptedException x) {
 				        return;
+				    } catch (ClosedWatchServiceException x) {
+				    	return;
 				    }
 
 				    for (WatchEvent<?> event: key.pollEvents()) {
@@ -312,14 +315,16 @@ public class PersistentWatcher {
 				        	if(kind == StandardWatchEventKinds.ENTRY_CREATE) {
 								registerAll(child);
 								File[] files = child.toFile().listFiles();
-								for (File f : files) {
-									logger.debug("Checking file " + f);
-									if(acceptFilter.accept(f)) {
-										try {
-											PersistentFileObject file = getObjectFor(f);
-											fireEvent(file, Type.ADDED);
-										} catch (URISyntaxException e) {
-											logger.error("Failed to parse URI of " + f.getAbsolutePath() + ", skipping...");
+								if(files != null) {
+									for (File f : files) {
+										logger.debug("Checking file " + f);
+										if(acceptFilter.accept(f)) {
+											try {
+												PersistentFileObject file = getObjectFor(f);
+												fireEvent(file, Type.ADDED);
+											} catch (URISyntaxException e) {
+												logger.error("Failed to parse URI of " + f.getAbsolutePath() + ", skipping...");
+											}
 										}
 									}
 								}
@@ -452,6 +457,7 @@ public class PersistentWatcher {
             		fireEvent(getObjectFor(dir.toFile()), Type.ADDED);
             	}
     			File[] children = dir.toFile().listFiles();
+    			if(children == null) return;
     			PersistentDir parentDir = root.findOrCreate(dir.toFile());
     			for (File file : children) {
     				if(stopped) return;
@@ -497,6 +503,7 @@ public class PersistentWatcher {
 				logger.info("Shutdown completed");
 			}
 		}
+		watcher.close();
 	}
 
 	/**
