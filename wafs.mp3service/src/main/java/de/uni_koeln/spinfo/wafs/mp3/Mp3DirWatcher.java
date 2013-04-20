@@ -306,6 +306,12 @@ public class Mp3DirWatcher {
 		}
 	}
 	
+	/**
+	 * Helper method to visit all {@link Track}s the watcher is aware of. This can
+	 * be useful to synchronize the watcher with a database.
+	 * @param visitor 
+	 * @param stopOnError
+	 */
 	public void visitKnownTracks(final TrackVisitor visitor, final boolean stopOnError) {
 		FileVisitor fileVisitor = new FileVisitor() {
 
