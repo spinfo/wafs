@@ -296,7 +296,6 @@ public class PersistentWatcher {
 
 				    for (WatchEvent<?> event: key.pollEvents()) {
 				        WatchEvent.Kind<?> kind = event.kind();
-
 				        if (kind == StandardWatchEventKinds.OVERFLOW) {
 				        	System.out.println("OVERFLOW!!");
 				        	// TODO: How to handle?
@@ -314,7 +313,7 @@ public class PersistentWatcher {
 								registerAll(child);
 								File[] files = child.toFile().listFiles();
 								for (File f : files) {
-									logger.info("Checking file " + f);
+									logger.debug("Checking file " + f);
 									if(acceptFilter.accept(f)) {
 										try {
 											PersistentFileObject file = getObjectFor(f);
@@ -325,10 +324,15 @@ public class PersistentWatcher {
 									}
 								}
 				        	} else if(kind == StandardWatchEventKinds.ENTRY_DELETE) {
+				        		// TODO: This actually will never happen...? Information about "isDirectory" is not available.
 				        		try {
 									PersistentFileObject removed = null;
 									synchronized(root) {
-										root.remove(new UnknownFSObject(child.toFile()));
+										logger.debug("Removing dir " + child.toFile());
+										removed = root.remove(new UnknownFSObject(child.toFile()));
+										if(removed == null) {
+											removed = new UnknownFSObject(child.toFile());
+										}
 									}
 									fireEvent(removed, Type.DELETED);
 								} catch (URISyntaxException e) {
@@ -339,18 +343,19 @@ public class PersistentWatcher {
                             continue;
                         }
 			            File f = child.toFile();
-			            if(!acceptFilter.accept(f)) {
-			            	continue;
-			            }
 			            if(debug)
 			            	logger.debug("Event: " + kind + " for " + child);
 						try {
 							if(kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+								 if(!acceptFilter.accept(f)) {
+						            	continue;
+						            }
 								PersistentFileObject file = getObjectFor(f);
 								fireEvent(file, kind == StandardWatchEventKinds.ENTRY_CREATE ? Type.ADDED : Type.MODIFIED);
 							} else {
 								PersistentFileObject removed = null;
 								synchronized(root) {
+									logger.debug("Removing file " + f);
 									removed = root.remove(new UnknownFSObject(f));
 									if(removed == null) {
 										removed = new UnknownFSObject(f);
@@ -365,7 +370,8 @@ public class PersistentWatcher {
 				    boolean valid = key.reset();
 				    if (!valid) {
 				    	keys.remove(key);
-				        break;
+				    	logger.debug("Removed key " + key + ", as it was no longer valid");
+				      //  break;
 				    }
 				}
 			}
@@ -390,7 +396,7 @@ public class PersistentWatcher {
 					        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
 					            throws IOException
 					        {
-					        	logger.info("Registering: " + dir);
+					        	logger.debug("Registering: " + dir);
 					            register(dir);
 					            if(stopped) return FileVisitResult.TERMINATE;
 					            return FileVisitResult.CONTINUE;
