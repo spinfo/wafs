@@ -173,6 +173,11 @@ public class Track implements Serializable {
 	public int getLength() {
 		return length;
 	}
+	
+	public String getFormattedLength() {
+		int seconds = length % 60;
+		return length/60 + ":" + (seconds < 10 ? "0" : "") + seconds;
+	}
 
 	public void setLength(int length) {
 		this.length = length;
