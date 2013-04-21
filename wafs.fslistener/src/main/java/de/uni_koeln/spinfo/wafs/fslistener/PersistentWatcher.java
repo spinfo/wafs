@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
@@ -24,11 +23,13 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -90,6 +91,8 @@ public class PersistentWatcher {
 	private boolean debug = logger.isDebugEnabled();
 	
 	private boolean modified = false;
+
+	private Timer persistTimer;
 	
 	/**
 	 * Creates a new Persistent Watcher service for the dir <code>baseDir</code>. All
@@ -142,98 +145,78 @@ public class PersistentWatcher {
 		logger.info("Starting watch service...");
 		startWatchService(dir);
 		
-		logger.info("Detecting deleted files...");
-		List<File> deleted = checkForDeletions(root);
-		for (File file : deleted) {
+		logger.info("Detecting deleted or modified files...");
+		Set<Entry<File, Boolean>> entries = check(root).entrySet();
+		for (Entry<File, Boolean> changed : entries) {
 			try {
-				UnknownFSObject object = new UnknownFSObject(file);
-				root.remove(object);
-				fireEvent(object, Type.DELETED);
-			} catch (URISyntaxException e) {
-				logger.warn("Ignoring invalid URL ", e);
-			}
-		}
-		
-		logger.info("Detecting modified files...");
-		List<File> modified = checkForModifications(root);
-		for (File file : modified) {
-			try {
-				PersistentFileObject object = null;
-				if(file.isFile()) {
-					object = new PersistentFile();
-					object.setPath(file.toURI());
-					object.setLastModified(file.lastModified());
+				File file = changed.getKey();
+				if(changed.getValue()) {
+					UnknownFSObject object = new UnknownFSObject(file);
+					root.remove(object);
+					fireEvent(object, Type.DELETED);
 				} else {
-					object = new PersistentDir();
-					object.setPath(file.toURI());
-					object.setLastModified(file.lastModified());
+					PersistentFileObject object = null;
+					if(file.isFile()) {
+						object = new PersistentFile();
+						object.setPath(file.toURI());
+						object.setLastModified(file.lastModified());
+					} else {
+						object = new PersistentDir();
+						object.setPath(file.toURI());
+						object.setLastModified(file.lastModified());
+					}
+					root.updateTimeStamp(file.toURI(), file.lastModified());
+					fireEvent(object, Type.MODIFIED);
 				}
-				root.updateTimeStamp(file.toURI(), file.lastModified());
-				fireEvent(object, Type.MODIFIED);
 			} catch (URISyntaxException e) {
 				logger.warn("Ignoring invalid URL ", e);
 			}
 		}
 		
-	}
-
-	private List<File> checkForDeletions(PersistentDir parent) {
-		Collection<? extends PersistentFileObject> children = parent.getChildObjects();
-		List<File> toReturn = new ArrayList<>();
-		for (PersistentFileObject child : children) {
-			if(child instanceof PersistentDir) {
-				toReturn.addAll(checkForDeletions((PersistentDir) child));
-			}
-			File f = new File(child.getPath());
-			if(!f.exists()) {
-				toReturn.add(f);
-			}
-		}
-		return toReturn;
 	}
 	
-	private List<File> checkForModifications(PersistentDir parent) {
-		Collection<? extends PersistentFileObject> children = parent.getChildObjects();
-		List<File> toReturn = new ArrayList<>();
-		for (PersistentFileObject child : children) {
-			if(child instanceof PersistentDir) {
-				toReturn.addAll(checkForModifications((PersistentDir) child));
-			}
-			File f = new File(child.getPath());
-			if(f.exists() && f.lastModified() > child.getLastModified()) {
-				toReturn.add(f);
+	/**
+	 * Helper method which checks for deletions and modifications.
+	 * @param parent
+	 * @return a map of files which are deleted (true) or modified (false). 
+	 */
+	private Map<File, Boolean> check(PersistentDir parent) {
+		Map<File, Boolean> toReturn = new HashMap<>();
+		synchronized(root) {
+			Collection<? extends PersistentFileObject> children = parent.getChildObjects();
+			for (PersistentFileObject child : children) {
+				if(child instanceof PersistentDir) {
+					toReturn.putAll(check((PersistentDir) child));
+				}
+				File f = new File(child.getPath());
+				if(!f.exists()) {
+					toReturn.put(f, true);
+				} else {
+					if(f.lastModified() > child.getLastModified()) {
+						toReturn.put(f, false);
+					}
+				}
 			}
 		}
 		return toReturn;
 	}
 
+
 	private void startPersistService() {
-		Thread thread = new Thread("storedb") {
+		persistTimer = new Timer("storedb");
+		TimerTask task = new TimerTask() {
 			
 			@Override
 			public void run() {
-				while(!stopped) {
-					synchronized(root) {
-						if(modified) {
-							modified = false;
-							try {
-								storeDB();
-								logger.info("Updated db");
-							} catch (Exception e) {
-								logger.error("Failed to store db", e);
-							}
-						}
-					}
-					try {
-						Thread.sleep(10000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				try {
+					storeDB();
+					logger.info("Updated db");
+				} catch (Exception e) {
+					logger.error("Failed to store db", e);
 				}
 			}
 		};
-		thread.start();
+		persistTimer.scheduleAtFixedRate(task, 10000, 10000);
 	}
 
 	private PersistentDir loadDB() throws IOException, JAXBException {
@@ -245,14 +228,23 @@ public class PersistentWatcher {
 	
 	private void storeDB() throws JAXBException, IOException {
 		synchronized(root) {
+			if(modified) {
+				modified = false;
+			} else {
+				return;
+			}
+			logger.info("Storing db for directory " + baseDir);
 			// New Java 7 Feature: Try-with-resources
 			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(db), "UTF-8"))) {
 				marshaller.marshal(root, bw);
+				bw.close();
+				logger.info("DB stored for directory " + baseDir);
 			}
 		}
 	}
 
 	private void fireEvent(PersistentFileObject object, Type type) {
+		if(stopped) return;
 		final FileEvent event = new FileEvent(object, type);
 		synchronized (root) {
 			modified = true;
@@ -261,6 +253,7 @@ public class PersistentWatcher {
 
 			@Override
 			public void run() {
+				if(stopped) return;
 				for (FileEventListener listener : listeners) {
 					try {
 						listener.handleEvent(event);
@@ -408,8 +401,7 @@ public class PersistentWatcher {
 					        }
 
 					    });
-					storeDB();
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
     		}
@@ -446,12 +438,14 @@ public class PersistentWatcher {
      * Register the given directory with the WatchService
      */
     private void register(Path dir) throws IOException {
+    	if(stopped) return;
         WatchKey key = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
                 StandardWatchEventKinds.ENTRY_DELETE,
                 StandardWatchEventKinds.ENTRY_MODIFY);
         keys.put(key, dir);
         try {
         	synchronized(root) {
+        		if(stopped) return;
         		boolean outdated = root.updateTimeStamp(dir.toFile().toURI(), dir.toFile().lastModified());
             	if(outdated) {
             		fireEvent(getObjectFor(dir.toFile()), Type.ADDED);
@@ -469,7 +463,7 @@ public class PersistentWatcher {
     					}
     					outdated = root.updateTimeStamp(dir.toFile().toURI(), dir.toFile().lastModified());
     		        	if(outdated) {
-    		        		
+    		        		// TODO...
     		        	}
     				}
     			}	
@@ -489,7 +483,14 @@ public class PersistentWatcher {
 	public void shutdown(long timeout) throws InterruptedException, IOException {
 		logger.info("Shutting down...");
 		stopped = true;
+		persistTimer.cancel();
 		synchronized(root) {
+			registerService.shutdownNow();
+			try {
+				registerService.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+			} catch (Exception e1) {
+				logger.warn("Exception while awaiting termination of register service",e1);
+			}
 			eventService.shutdown();
 			try {
 				boolean success = eventService.awaitTermination(timeout, TimeUnit.MILLISECONDS);
@@ -497,6 +498,7 @@ public class PersistentWatcher {
 			} finally {
 					try {
 						storeDB();
+						logger.info("DB stored during shutdown");
 					} catch (JAXBException e) {
 						throw new IOException("Failed to store database", e);
 					}
