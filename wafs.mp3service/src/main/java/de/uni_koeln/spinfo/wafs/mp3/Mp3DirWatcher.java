@@ -336,6 +336,10 @@ public class Mp3DirWatcher {
 		}
 	}
 
+	/**
+	 * Initiates a shutdown of the service. This method <strong>must</strong> be called to release
+	 * all resources, and to store the current state of the registered {@link PersistentWatcher}s. 
+	 */
 	public void shutdown() {
 		logger.info("Initializing shutdown for " + services.values().size() + " watcher(s)...");
 		Collection<PersistentWatcher> watcher = services.values();
