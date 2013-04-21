@@ -146,32 +146,39 @@ public class PersistentWatcher {
 		startWatchService(dir);
 		
 		logger.info("Detecting deleted or modified files...");
-		Set<Entry<File, Boolean>> entries = check(root).entrySet();
-		for (Entry<File, Boolean> changed : entries) {
-			try {
-				File file = changed.getKey();
-				if(changed.getValue()) {
-					UnknownFSObject object = new UnknownFSObject(file);
-					root.remove(object);
-					fireEvent(object, Type.DELETED);
-				} else {
-					PersistentFileObject object = null;
-					if(file.isFile()) {
-						object = new PersistentFile();
-						object.setPath(file.toURI());
-						object.setLastModified(file.lastModified());
-					} else {
-						object = new PersistentDir();
-						object.setPath(file.toURI());
-						object.setLastModified(file.lastModified());
+		new Thread("chkmod") {
+			
+			public void run() {
+				Set<Entry<File, Boolean>> entries = check(root).entrySet();
+				for (Entry<File, Boolean> changed : entries) {
+					try {
+						File file = changed.getKey();
+						if(changed.getValue()) {
+							UnknownFSObject object = new UnknownFSObject(file);
+							root.remove(object);
+							fireEvent(object, Type.DELETED);
+						} else {
+							PersistentFileObject object = null;
+							if(file.isFile()) {
+								object = new PersistentFile();
+								object.setPath(file.toURI());
+								object.setLastModified(file.lastModified());
+							} else {
+								object = new PersistentDir();
+								object.setPath(file.toURI());
+								object.setLastModified(file.lastModified());
+							}
+							root.updateTimeStamp(file.toURI(), file.lastModified());
+							fireEvent(object, Type.MODIFIED);
+						}
+					} catch (URISyntaxException e) {
+						logger.warn("Ignoring invalid URL ", e);
 					}
-					root.updateTimeStamp(file.toURI(), file.lastModified());
-					fireEvent(object, Type.MODIFIED);
 				}
-			} catch (URISyntaxException e) {
-				logger.warn("Ignoring invalid URL ", e);
-			}
-		}
+			};
+			
+		}.start();
+		
 		
 	}
 	
@@ -210,13 +217,12 @@ public class PersistentWatcher {
 			public void run() {
 				try {
 					storeDB();
-					logger.info("Updated db");
 				} catch (Exception e) {
 					logger.error("Failed to store db", e);
 				}
 			}
 		};
-		persistTimer.scheduleAtFixedRate(task, 10000, 10000);
+		persistTimer.schedule(task, 10000, 10000);
 	}
 
 	private PersistentDir loadDB() throws IOException, JAXBException {
