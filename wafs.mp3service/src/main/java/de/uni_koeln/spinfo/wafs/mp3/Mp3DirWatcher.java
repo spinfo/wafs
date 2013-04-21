@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.WatchService;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -183,11 +184,12 @@ public class Mp3DirWatcher {
 					listener);
 			services.put(directory, watcher);
 		} catch (CorruptDBException e) {
-			logger.warn("Deleting corrupt database...");
+			logger.error("Corrupt database found!",e);
 			dbFile.delete();
 			try {
 				watcher = new PersistentWatcher(directory, dbFile,
 						acceptFilter, listener);
+				services.put(directory, watcher);
 			} catch (CorruptDBException e1) {
 				throw new IOException("Failed to initialize watcher", e);
 			}
@@ -332,6 +334,19 @@ public class Mp3DirWatcher {
 		for (PersistentWatcher watcher : services.values()) {
 			watcher.visitKnownFiles(fileVisitor);
 		}
+	}
+
+	public void shutdown() {
+		logger.info("Initializing shutdown for " + services.values().size() + " watcher(s)...");
+		Collection<PersistentWatcher> watcher = services.values();
+		for (PersistentWatcher pw : watcher) {
+			try {
+				pw.shutdown(2000);
+			} catch (InterruptedException | IOException e) {
+				logger.warn("Error while shutting down watcher", e);
+			}
+		}
+		logger.info("Shutdown completed.");
 	}
 
 }
