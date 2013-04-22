@@ -11,13 +11,6 @@
 		<version>1.0.0</version>
 	</parent>
 	
-	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
-
 	<dependencies>
 
 		<!-- ID3-Tag API -->
@@ -34,23 +27,6 @@
 			<version>1.0.0</version>
 		</dependency>
 
-		<!-- Logging -->
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-		</dependency>
-		
-		<!-- Unit testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
-
-
 	</dependencies>
-
 
 </project>
