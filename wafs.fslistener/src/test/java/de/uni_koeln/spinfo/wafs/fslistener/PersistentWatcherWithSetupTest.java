@@ -73,9 +73,11 @@ public class PersistentWatcherWithSetupTest {
 
 	/**
 	 * The method with the "@After"-Annotation will be executed after any test.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@After
-	public void tearDown() {
+	public void tearDown() throws InterruptedException {
 
 		try {
 			watcher.shutdown(20000);
@@ -90,6 +92,7 @@ public class PersistentWatcherWithSetupTest {
 			System.out.println();
 			if (file.exists()) {
 				file.delete();
+				waitForDeleteEvent(file);
 			}
 		}
 	}
@@ -181,8 +184,13 @@ public class PersistentWatcherWithSetupTest {
 		// Add new file to observed folder
 		File file = new File(toWatch.getAbsolutePath() + "/testfile.testfile");
 		file.createNewFile();
+
 		toDelete.add(file);
-		Thread.sleep(1000);
+
+		if (!waitForAddEvent(file)) {
+			Assert.fail("Listener does not fire add event in acceptable time");
+		}
+		// Thread.sleep(10000);
 		// Modify File
 		FileWriter fw = new FileWriter(file);
 		fw.append('a');
@@ -191,8 +199,9 @@ public class PersistentWatcherWithSetupTest {
 
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			for (FileEvent fe : eventList) {
+				System.out.println(i + " " + fe);
 				if (fe.getType().equals(Type.MODIFIED)) {
 					File newFile = new File(fe.getObject().getPath());
 					if (newFile.equals(file)) {
@@ -221,14 +230,22 @@ public class PersistentWatcherWithSetupTest {
 		// Add new file to observed folder
 		File file = new File(toWatch.getAbsolutePath() + "/testfile.testfile");
 		file.createNewFile();
-		Thread.sleep(1000);
+		toDelete.add(file);
+		// Especially Macs are very slow in hard-drive writing operations
+		if (!waitForAddEvent(file)) {
+			Assert.fail("Listener does not fire add event in acceptable time");
+		}
+
 		// Delete File
 		file.delete();
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 50; i++) {
+
 			for (FileEvent fe : eventList) {
+				System.out.println(i + " " + fe);
 				if (fe.getType().equals(Type.DELETED)) {
+
 					File newFile = new File(fe.getObject().getPath());
 					if (newFile.equals(file)) {
 						foundEvent = true;
@@ -242,6 +259,7 @@ public class PersistentWatcherWithSetupTest {
 			Thread.sleep(500);
 		}
 		Assert.assertTrue(foundEvent);
+
 	}
 
 	/**
@@ -263,7 +281,9 @@ public class PersistentWatcherWithSetupTest {
 		toDelete.add(file);
 
 		// Shutdown watcher
-		Thread.sleep(5000);
+		if (!waitForAddEvent(file)) {
+			Assert.fail("Listener does not fire add event in acceptable time");
+		}
 		watcher.shutdown(20000);
 
 		// Start watcher again
@@ -321,7 +341,9 @@ public class PersistentWatcherWithSetupTest {
 		toDelete.add(file);
 		toDelete.add(folder);
 
-		Thread.sleep(5000);
+		if (!waitForAddEvent(file)) {
+			Assert.fail("Listener does not fire add event in acceptable time");
+		}
 
 		watcher.shutdown(2000);
 
@@ -329,7 +351,7 @@ public class PersistentWatcherWithSetupTest {
 		System.out.println("Delete: " + delete);
 		boolean delete2 = folder.delete();
 		System.out.println("Delete2: " + delete2);
-		
+
 		watcher = new PersistentWatcher(toWatch, dbFile, filter,
 				new FileEventListener() {
 					@Override
@@ -359,6 +381,42 @@ public class PersistentWatcherWithSetupTest {
 			Thread.sleep(500);
 		}
 		Assert.assertTrue(foundEvent);
+	}
+
+	private boolean waitForAddEvent(File file) throws InterruptedException {
+		for (int i = 0; i < 30; i++) {
+			for (FileEvent fe : eventList) {
+				// System.out.println(i + " " + fe);
+				if (fe.getType().equals(Type.ADDED)) {
+					File newFile = new File(fe.getObject().getPath());
+					if (newFile.getAbsolutePath()
+							.equals(file.getAbsolutePath())) {
+						// System.out.println("HERE");
+						return true;
+					}
+				}
+			}
+			Thread.sleep(500);
+		}
+		return false;
+	}
+
+	private boolean waitForDeleteEvent(File file) throws InterruptedException {
+		for (int i = 0; i < 30; i++) {
+			for (FileEvent fe : eventList) {
+				// System.out.println(i + " " + fe);
+				if (fe.getType().equals(Type.DELETED)) {
+					File newFile = new File(fe.getObject().getPath());
+					if (newFile.getAbsolutePath()
+							.equals(file.getAbsolutePath())) {
+						// System.out.println("HERE");
+						return true;
+					}
+				}
+			}
+			Thread.sleep(500);
+		}
+		return false;
 	}
 
 }
