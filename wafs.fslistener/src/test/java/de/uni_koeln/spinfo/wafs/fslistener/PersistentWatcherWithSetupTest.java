@@ -104,7 +104,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test
+	@Test(timeout = 10000)
 	public void testAddFileToTopLevelFolder() throws IOException,
 			InterruptedException {
 		// Add new file to observed folder
@@ -114,7 +114,7 @@ public class PersistentWatcherWithSetupTest {
 
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 10; i++) {
+		while(true) {
 			for (FileEvent fe : eventList) {
 				if (fe.getType().equals(Type.ADDED)) {
 					File newFile = new File(fe.getObject().getPath());
@@ -140,7 +140,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test
+	@Test(timeout = 10000)
 	public void testAddFileToEmbeddedFolder() throws IOException,
 			InterruptedException {
 		// Add new folder to observed folder
@@ -153,7 +153,7 @@ public class PersistentWatcherWithSetupTest {
 		toDelete.add(folder);
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 10; i++) {
+		while(true) {
 			for (FileEvent fe : eventList) {
 				if (fe.getType().equals(Type.ADDED)) {
 					File newFile = new File(fe.getObject().getPath());
@@ -179,7 +179,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test
+	@Test(timeout = 100000)
 	public void testFileModification() throws IOException, InterruptedException {
 		// Add new file to observed folder
 		File file = new File(toWatch.getAbsolutePath() + "/testfile.testfile");
@@ -199,9 +199,8 @@ public class PersistentWatcherWithSetupTest {
 
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 100; i++) {
+		while(true) {
 			for (FileEvent fe : eventList) {
-				System.out.println(i + " " + fe);
 				if (fe.getType().equals(Type.MODIFIED)) {
 					File newFile = new File(fe.getObject().getPath());
 					if (newFile.equals(file)) {
@@ -225,7 +224,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test
+	@Test(timeout = 100000)
 	public void testFileDeletion() throws IOException, InterruptedException {
 		// Add new file to observed folder
 		File file = new File(toWatch.getAbsolutePath() + "/testfile.testfile");
@@ -240,10 +239,10 @@ public class PersistentWatcherWithSetupTest {
 		file.delete();
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 50; i++) {
+		while(true) {
 
 			for (FileEvent fe : eventList) {
-				System.out.println(i + " " + fe);
+				
 				if (fe.getType().equals(Type.DELETED)) {
 
 					File newFile = new File(fe.getObject().getPath());
@@ -272,7 +271,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws CorruptDBException
 	 * @throws URISyntaxException
 	 */
-	@Test
+	@Test(timeout = 10000)
 	public void testLoadDatabase() throws IOException, InterruptedException,
 			CorruptDBException, URISyntaxException {
 		// Add new file to observed folder
@@ -328,7 +327,7 @@ public class PersistentWatcherWithSetupTest {
 		}
 	};
 
-	@Test
+	@Test(timeout = 10000)
 	public void testFolderDeletion() throws IOException, InterruptedException,
 			CorruptDBException {
 
@@ -362,9 +361,9 @@ public class PersistentWatcherWithSetupTest {
 				});
 		// Wait for event
 		boolean foundEvent = false;
-		for (int i = 0; i < 10; i++) {
+		while(true){
 			for (FileEvent fe : eventList) {
-				System.out.println(fe);
+				
 				if (fe.getType().equals(Type.DELETED)) {
 					File newFile = new File(fe.getObject().getPath());
 					System.out.println(newFile.getPath());
