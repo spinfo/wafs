@@ -68,7 +68,7 @@ public class PersistentWatcherIntegrationTest {
 						}
 					});
 		} catch (CorruptDBException | IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -84,10 +84,10 @@ public class PersistentWatcherIntegrationTest {
 		try {
 			watcher.shutdown(20000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		for (File file : toDelete) {
