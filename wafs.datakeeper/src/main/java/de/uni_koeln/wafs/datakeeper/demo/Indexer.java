@@ -16,7 +16,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
 public class Indexer {
@@ -24,8 +24,10 @@ public class Indexer {
 	public static void main(String[] args) throws IOException {
 		// Verzeichnis des Lucene-Indexes
 		String indexDir = "demo/index";
+		
 		// In diesem Verzeichnis liegen die zu indexierenden Daten als .txt
 		String data = "demo/texts";
+		
 		// Datei mit Stopwörter
 		String stopWords = "demo/texts/stop words/stopwords.txt";
 
@@ -35,26 +37,30 @@ public class Indexer {
 			int numIndexed = indexer.index(data);
 			indexer.close();
 			long end = System.currentTimeMillis();
-			System.out.println("Indexing took " + (end - start) + " ms for "
-					+ numIndexed + " files.");
+			System.out.println("Indexing took " + (end - start) + " ms for " + numIndexed + " files.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private IndexWriter writer;
 
 	public Indexer(final String indexDir, final String stopWords)
 			throws IOException {
-		// Erzeuge einer Directory. Sie repräsentiert den Speicherort des
-		// Indexes
-		Directory dir = new NIOFSDirectory(new File(indexDir));
+		// Directory repräsentiert den Speicherort des Indexes
+		Directory dir = new SimpleFSDirectory(new File(indexDir));
+		
+		// Erzeugt einen StandartAnalyzer. Dieser berücksichtigt bei der 
+		// Tokenisierung die List der Stopwörter
 		Collection<String> c = getStopWords(stopWords);
 		CharArraySet set = new CharArraySet(Version.LUCENE_42, c, true);
 		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_42, set);
-		IndexWriterConfig writerConfig = new IndexWriterConfig(
-				Version.LUCENE_42, analyzer);
+		
+		// Alternativ kann die Liste der Stopwörtern mit einem Reader übergeben werden 
+		// StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_42, new FileReader(new File("stopWords")));
+		
+		IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LUCENE_42, analyzer);
+		
 		// Erzeuge den IndexWriter
 		writer = new IndexWriter(dir, writerConfig);
 	}
@@ -98,20 +104,33 @@ public class Indexer {
 	private Document getDocument(File f) throws Exception {
 		// Erzeugt ein neues Document-Objekt
 		Document doc = new Document();
-		// Erzeugt einen BufferedReader. Dieser ließt den Text zeilenweise
-		// ein. Der StringBuilder fügt die Zeilen zu einem String zusammen.
+		
+		// Erzeugt einen BufferedReader und einen StringBuilder 
 		BufferedReader br = new BufferedReader(new FileReader(f));
-		String line;
 		StringBuilder sb = new StringBuilder();
+		String line = "";
+		
+		// Der BufferedReader ließt den Text zeilenweise
+		// ein. Der StringBuilder fügt die Zeilen zu einem String zusammen.
+		// Der StringBuilder ist bei der Verknüpfung von Strings wesentlich 
+		// perfomanter, als die Variante: 
+		// line += line + " ";
 		while ((line = br.readLine()) != null) {
 			sb.append(line);
 		}
+		
 		// BufferedReader wird geschlossen
 		br.close();
-		// Dem oben erzeugten Document werden Felder übergeben. Der erste
-		// Parameter des Feldes ist ein Schlüssel, der zweite der konkrete Wert.
-		doc.add(new TextField("contents", sb.toString(), Store.YES));
+		
+		// Dem Dokument werden Felder übergeben. Der erste Parameter des Feldes ist 
+		// der Name des Feldes (Schlüssel), der zweite ein konkreter Wert. Der dritte 
+		// Parameter legt fest, ob der Originalwert mit indexiert wird, d.h. ohne 
+		// einen Analyzer zu gebrauchen
+		
+		doc.add(new TextField("contents", sb.toString(), Store.NO));
 		doc.add(new StringField("filename", f.getCanonicalPath(), Store.YES));
+		
+		// Dokument wird zurückgegeben
 		return doc;
 	}
 

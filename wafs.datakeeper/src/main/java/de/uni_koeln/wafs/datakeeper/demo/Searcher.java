@@ -18,7 +18,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
 public class Searcher {
@@ -26,11 +26,17 @@ public class Searcher {
 	public static void main(String[] args) {
 		// Verzeichnis des Lucene-Indexes
 		String indexDir = "demo/index";
+		
 		// Suchbegriff
-		String q = "Welt";
+		String q = "Kampfhamster";
+		
+		// Stopwort... sollte nicht gefunden werden.
 		// String q = "woran";
-		// Datei mit Stopwörter
+		
+		// Datei mit Stopwörter. Diese sollte identisch mit der Liste sein, 
+		// welche zum Indexieren verwendet wurde.
 		String stopWords = "demo/texts/stop words/stopwords.txt";
+		
 		try {
 			search(indexDir, q, stopWords);
 		} catch (IOException e) {
@@ -42,18 +48,27 @@ public class Searcher {
 
 	private static void search(String indexDir, String q, String stopWords)
 			throws IOException, ParseException {
-		Directory dir = new NIOFSDirectory(new File(indexDir));
+		Directory dir = new SimpleFSDirectory(new File(indexDir));
+		
+		// Öffnet den Index (read-only-mode)
 		DirectoryReader dirReader = DirectoryReader.open(dir);
+		
 		// Erzeuge einen IndexSearcher
 		IndexSearcher is = new IndexSearcher(dirReader);
+		
 		// Der gleiche Analyzer wie aus Indexer
 		Collection<String> c = getStopWords(stopWords);
 		CharArraySet set = new CharArraySet(Version.LUCENE_42, c, true);
+		// Der Analyzer wird verwendet, um den vom User eingegebenen Text in Terme (Term) zu überführen.
 		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_42, set);
-		QueryParser parser = new QueryParser(Version.LUCENE_42, "contents",
-				analyzer);
+		
+		// Überführt den vom User eigegebenen "Suchtext" in eine Lucene Query
+		QueryParser parser = new QueryParser(Version.LUCENE_42, "contents", analyzer);
 		Query query = parser.parse(q);
+		System.out.println("QUERY: " + query);
+		
 		long start = System.currentTimeMillis();
+		
 		// IndexSearcher sucht nach der übergebenen Query und liefert die 10
 		// besten Resultate
 		TopDocs hits = is.search(query, 10);
@@ -63,9 +78,10 @@ public class Searcher {
 				+ "':");
 		for (int i = 0; i < hits.scoreDocs.length; i++) {
 			ScoreDoc scoreDoc = hits.scoreDocs[i];
+			
 			// Mittels der DocID wird das entsprechende Dokument ausgelesen
 			Document doc = is.doc(scoreDoc.doc);
-			// oder
+			// alternativ...
 			// Document doc = is.getIndexReader().document(scoreDoc.doc);
 			
 			// Filename wird ausgegeben  (key-value Prinzip)
