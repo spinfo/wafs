@@ -13,8 +13,8 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import de.uni_koeln.spinfo.wafs.fslistener.FileEvent.Type;
 import de.uni_koeln.spinfo.wafs.fslistener.data.PersistentFile;
@@ -25,7 +25,9 @@ import de.uni_koeln.spinfo.wafs.fslistener.data.PersistentFile;
  * @author jhermes
  * 
  */
-public class PersistentWatcherWithSetupTest {
+
+@Category(IntegrationTest.class)
+public class PersistentWatcherIntegrationTest {
 
 	// Records files that were created in the unit tests to delete them after
 	// execution
@@ -104,7 +106,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test(timeout = 10000)
+	@Test(timeout = 100000)
 	public void testAddFileToTopLevelFolder() throws IOException,
 			InterruptedException {
 		// Add new file to observed folder
@@ -140,7 +142,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test(timeout = 10000)
+	@Test(timeout = 100000)
 	public void testAddFileToEmbeddedFolder() throws IOException,
 			InterruptedException {
 		// Add new folder to observed folder
@@ -271,7 +273,7 @@ public class PersistentWatcherWithSetupTest {
 	 * @throws CorruptDBException
 	 * @throws URISyntaxException
 	 */
-	@Test(timeout = 10000)
+	@Test(timeout = 100000)
 	public void testLoadDatabase() throws IOException, InterruptedException,
 			CorruptDBException, URISyntaxException {
 		// Add new file to observed folder
@@ -316,7 +318,7 @@ public class PersistentWatcherWithSetupTest {
 	}
 
 	private static Logger logger = Logger
-			.getLogger(PersistentWatcherWithSetupTest.class);
+			.getLogger(PersistentWatcherIntegrationTest.class);
 
 	private FileFilter filter = new FileFilter() {
 		@Override
@@ -327,7 +329,7 @@ public class PersistentWatcherWithSetupTest {
 		}
 	};
 
-	@Test(timeout = 10000)
+	@Test(timeout = 100000)
 	public void testFolderDeletion() throws IOException, InterruptedException,
 			CorruptDBException {
 
@@ -383,7 +385,8 @@ public class PersistentWatcherWithSetupTest {
 	}
 
 	private boolean waitForAddEvent(File file) throws InterruptedException {
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 50; i++) {
+		
 			for (FileEvent fe : eventList) {
 				// System.out.println(i + " " + fe);
 				if (fe.getType().equals(Type.ADDED)) {
@@ -401,7 +404,7 @@ public class PersistentWatcherWithSetupTest {
 	}
 
 	private boolean waitForDeleteEvent(File file) throws InterruptedException {
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 50; i++) {
 			for (FileEvent fe : eventList) {
 				// System.out.println(i + " " + fe);
 				if (fe.getType().equals(Type.DELETED)) {
