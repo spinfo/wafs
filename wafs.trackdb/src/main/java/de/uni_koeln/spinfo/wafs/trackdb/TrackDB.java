@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import de.uni_koeln.spinfo.wafs.fslistener.PersistentWatcher;
 import de.uni_koeln.spinfo.wafs.mp3.ChangeHandler;
 import de.uni_koeln.spinfo.wafs.mp3.Mp3DirWatcher;
+import de.uni_koeln.spinfo.wafs.mp3.Mp3Writer;
 import de.uni_koeln.spinfo.wafs.mp3.TrackVisitor;
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 import de.uni_koeln.wafs.datakeeper.lucene.Index;
@@ -123,8 +124,10 @@ public class TrackDB {
 					synchronized(writeLock) {
 						if(indexModified > 0) {
 							try {
-								logger.info("Committing " + indexModified + " index changes...");
+								long start = System.nanoTime();
 								index.commit();
+								long end = System.nanoTime();
+								logger.info("Committed " + indexModified + " index changes in " + (end-start)/1000000 + " ms.");
 								indexModified = 0;
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -233,6 +236,17 @@ public class TrackDB {
 			
 		};
 		visitThread.start();
+	}
+	
+	/**
+	 * <strong>Currently untested - use with caution!</strong>
+	 * Update the given track, and store the track infos in the ID3 header
+	 * of the file referenced by {@link Track#getLocation()}.
+	 * @param track
+	 * @throws IOException if an IO-error occurs while writing the file
+	 */
+	public synchronized void update(Track track) throws IOException {
+		Mp3Writer.update(track);
 	}
 
 }
