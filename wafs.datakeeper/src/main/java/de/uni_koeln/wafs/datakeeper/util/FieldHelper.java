@@ -79,6 +79,7 @@ public class FieldHelper {
 			stringFields.add(new TextField(field.toString(), (String) value, Field.Store.YES));
 			stringFields.add(new StringField(field.toString()+"_exact", (String) value, Field.Store.YES));
 			return stringFields;
+		case BPM:
 		case BITRATE:
 		case DISC_NO:
 		case DISC_TOTAL:
@@ -93,6 +94,9 @@ public class FieldHelper {
 			List<Field> longFields = new ArrayList<Field>();
 			longFields.add(new LongField(field.toString(), (Long) value, Field.Store.YES));
 			return longFields;
+		case MUSIC_BRAINZ_ARTIST_ID:
+		case MUSIC_BRAINZ_DISC_ID:
+		case MUSIC_BRAINZ_TRACK_ID:
 		case LOCATION:
 			List<Field> fields = new ArrayList<Field>();
 			fields.add(new StringField(field.toString()+"_exact", (String) value, Field.Store.YES));

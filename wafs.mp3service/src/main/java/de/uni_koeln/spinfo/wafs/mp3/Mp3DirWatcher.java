@@ -239,8 +239,10 @@ public class Mp3DirWatcher {
 							item.setArtistSort(tag.getFirst(FieldKey.ARTIST_SORT));
 							item.setAlbum(tag.getFirst(FieldKey.ALBUM));
 							item.setAlbumSort(tag.getFirst(FieldKey.ALBUM_SORT));
+							item.setAlbumArtist(tag.getFirst(FieldKey.ALBUM_ARTIST));
 							item.setAlbumArtistSort(tag
 									.getFirst(FieldKey.ALBUM_ARTIST_SORT));
+							item.setBPM(parseInt(tag.getFirst(FieldKey.BPM)));
 							item.setDiscNo(parseInt(tag.getFirst(FieldKey.DISC_NO)));
 							item.setDiscTotal(parseInt(tag
 									.getFirst(FieldKey.DISC_TOTAL)));
@@ -253,14 +255,19 @@ public class Mp3DirWatcher {
 							item.setTrackTotal(parseInt(tag
 									.getFirst(FieldKey.TRACK_TOTAL)));
 							item.setYear(parseInt(tag.getFirst(FieldKey.YEAR)));
+							item.setMusicBrainzTrackID(tag.getFirst(FieldKey.MUSICBRAINZ_TRACK_ID));
+							item.setMusicBrainzDiscID(tag.getFirst(FieldKey.MUSICBRAINZ_DISC_ID));
+							item.setMusicBrainzArtistID(tag.getFirst(FieldKey.MUSICBRAINZ_ARTISTID));
 						} else if (abstractTag instanceof ID3v1Tag) {
 							ID3v1Tag tag = (ID3v1Tag) abstractTag;
 							item.setArtist(tag.getFirst(FieldKey.ARTIST));
 							item.setArtistSort(tag.getFirst(FieldKey.ARTIST_SORT));
 							item.setAlbum(tag.getFirst(FieldKey.ALBUM));
+							item.setAlbumArtist(tag.getFirst(FieldKey.ALBUM_ARTIST));
 							item.setAlbumSort(tag.getFirst(FieldKey.ALBUM_SORT));
 							item.setAlbumArtistSort(tag
 									.getFirst(FieldKey.ALBUM_ARTIST_SORT));
+							item.setBPM(parseInt(tag.getFirst(FieldKey.BPM)));
 							item.setDiscNo(parseInt(tag.getFirst(FieldKey.DISC_NO)));
 							item.setDiscTotal(parseInt(tag
 									.getFirst(FieldKey.DISC_TOTAL)));
@@ -273,6 +280,9 @@ public class Mp3DirWatcher {
 							item.setTrackTotal(parseInt(tag
 									.getFirst(FieldKey.TRACK_TOTAL)));
 							item.setYear(parseInt(tag.getFirst(FieldKey.YEAR)));
+							item.setMusicBrainzTrackID(tag.getFirst(FieldKey.MUSICBRAINZ_TRACK_ID));
+							item.setMusicBrainzDiscID(tag.getFirst(FieldKey.MUSICBRAINZ_DISC_ID));
+							item.setMusicBrainzArtistID(tag.getFirst(FieldKey.MUSICBRAINZ_ARTISTID));
 						} else {
 							logger.error("Neither ID3v1 nor ID3v2: "
 									+ file.getAbsolutePath());

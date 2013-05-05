@@ -28,33 +28,31 @@ public class Track implements Serializable {
 
 	private static final long serialVersionUID = -7441826398087095124L;
 
-	private String artist, album, artistSort, albumSort, albumArtistSort,
-			genre, title, titleSort;
+	private String artist, album, albumArtist, artistSort, albumSort, albumArtistSort,
+			genre, title, titleSort, musicBrainzTrackID, musicBrainzDiscID, musicBrainzArtistID;
 
 	private long lastModified;
 
-	private int discNo, discTotal, track, trackTotal, year, length, bitRate;
+	private int discNo, discTotal, track, trackTotal, year, length, bitRate, bpm;
 
 	private URI location;
 
 	private boolean isCompilation;
 
-	public enum Fields {
-		ARTIST, ALBUM, GENRE, TITLE, LAST_MODIFIED, YEAR, LENGTH, BITRATE, LOCATION, 
-		ARTIST_SORT, ALBUM_SORT, ALBUM_ARTIST_SORT, TITLE_SORT, DISC_NO, DISC_TOTAL, 
-		TRACK, TRACK_TOTAL, IS_COMPILATION;
-	}
-
 	@Override
 	public String toString() {
-		return "Track [artist=" + artist + ", album=" + album + ", artistSort="
-				+ artistSort + ", albumSort=" + albumSort
-				+ ", albumArtistSort=" + albumArtistSort + ", genre=" + genre
-				+ ", title=" + title + ", titleSort=" + titleSort
-				+ ", lastModified=" + lastModified + ", discNo=" + discNo
-				+ ", discTotal=" + discTotal + ", track=" + track
-				+ ", trackTotal=" + trackTotal + ", year=" + year + ", length="
-				+ length + ", bitRate=" + bitRate + ", location=" + location
+		return "Track [artist=" + artist + ", album=" + album
+				+ ", albumArtist=" + albumArtist + ", artistSort=" + artistSort
+				+ ", albumSort=" + albumSort + ", albumArtistSort="
+				+ albumArtistSort + ", genre=" + genre + ", title=" + title
+				+ ", titleSort=" + titleSort + ", musicBrainzTrackID="
+				+ musicBrainzTrackID + ", musicBrainzDiscID="
+				+ musicBrainzDiscID + ", musicBrainzArtistID="
+				+ musicBrainzArtistID + ", lastModified=" + lastModified
+				+ ", discNo=" + discNo + ", discTotal=" + discTotal
+				+ ", track=" + track + ", trackTotal=" + trackTotal + ", year="
+				+ year + ", length=" + length + ", bitRate=" + bitRate
+				+ ", bpm=" + bpm + ", location=" + location
 				+ ", isCompilation=" + isCompilation + "]";
 	}
 
@@ -65,6 +63,14 @@ public class Track implements Serializable {
 	public void setArtist(String artist) {
 		this.artist = artist;
 	}
+	
+	public int getBPM() {
+		return bpm;
+	}
+
+	public void setBPM(int bpm) {
+		this.bpm = bpm;
+	}
 
 	public String getAlbum() {
 		return album;
@@ -74,6 +80,14 @@ public class Track implements Serializable {
 		this.album = album;
 	}
 
+	public String getAlbumArtist() {
+		return albumArtist;
+	}
+
+	public void setAlbumArtist(String albumArtist) {
+		this.albumArtist = albumArtist;
+	}
+	
 	public String getArtistSort() {
 		return artistSort;
 	}
@@ -210,6 +224,30 @@ public class Track implements Serializable {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	
+	public String getMusicBrainzTrackID() {
+		return musicBrainzTrackID;
+	}
+
+	public void setMusicBrainzTrackID(String musicBrainzTrackID) {
+		this.musicBrainzTrackID = musicBrainzTrackID;
+	}
+
+	public String getMusicBrainzDiscID() {
+		return musicBrainzDiscID;
+	}
+
+	public void setMusicBrainzDiscID(String musicBrainzDiscID) {
+		this.musicBrainzDiscID = musicBrainzDiscID;
+	}
+
+	public String getMusicBrainzArtistID() {
+		return musicBrainzArtistID;
+	}
+
+	public void setMusicBrainzArtistID(String musicBrainzArtistID) {
+		this.musicBrainzArtistID = musicBrainzArtistID;
+	}
 
 	public InputStream getImage() throws Mp3Exception {
 		try {
@@ -259,5 +297,6 @@ public class Track implements Serializable {
 			return null;
 		}
 	}
+
 
 }
