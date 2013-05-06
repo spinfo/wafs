@@ -89,8 +89,8 @@ public class Index {
 	}
 
 	private Query createQuery(WAFSQuery q) {
-		Map<String, String> values = q.getValues();
-		List<String> fields = new ArrayList<String>(values.keySet());
+		Map<TrackField, String> values = q.getValues();
+		List<TrackField> fields = new ArrayList<TrackField>(values.keySet());
 		boolean exact = q.isExact();
 		boolean or = q.isOr();
 		StringBuilder sb = new StringBuilder();
@@ -98,10 +98,10 @@ public class Index {
 		parser.setAllowLeadingWildcard(false);
 
 		for (int i = 0; i < fields.size(); i++) {
-			String field = fields.get(i);
+			TrackField field = fields.get(i);
 			String value = values.get(field);
 
-			if (exact && FieldHelper.isString(field)) {
+			if (exact && FieldHelper.isString(field.toString())) {
 				sb.append(field + "_exact:\"" + value + "\"");
 			} else {
 				sb.append(field + ":\"" + value + "\"");

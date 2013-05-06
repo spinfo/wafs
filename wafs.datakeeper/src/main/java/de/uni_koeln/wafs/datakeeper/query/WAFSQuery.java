@@ -1,15 +1,18 @@
 package de.uni_koeln.wafs.datakeeper.query;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import de.uni_koeln.wafs.datakeeper.util.TrackField;
 
 public class WAFSQuery implements Serializable {
 
 	private static final long serialVersionUID = -6604687030676465634L;
 	private boolean exact;
 	private boolean or;
-	private Map<String, String> values;
+	private Map<TrackField, String> values = new HashMap<TrackField, String>();
 	private List<String> sortOrder;
 	private List<Boolean> sortAscending;
 	private int pageSize;
@@ -67,12 +70,28 @@ public class WAFSQuery implements Serializable {
 		this.or = or;
 	}
 
-	public Map<String, String> getValues() {
+	public Map<TrackField, String> getValues() {
 		return values;
 	}
 
-	public void setValues(Map<String, String> values) {
+	public void setValues(Map<TrackField, String> values) {
 		this.values = values;
+	}
+	
+	public void setValue(TrackField field, String value) {
+		if(value == null) {
+			values.remove(field);
+		} else {
+			values.put(field, value);
+		}
+	}
+	
+	public void removeValue(TrackField field) {
+		values.remove(field);
+	}
+	
+	public void clearValues() {
+		values.clear();
 	}
 
 	@Override

@@ -27,9 +27,9 @@ public class IndexTest {
 		WAFSQuery q = new WAFSQuery();
 		q.setCurrentPage(0);
 		q.setPageSize(50);
-		Map<String, String> values = new HashMap<String, String>();
-		values.put(TrackField.ARTIST.toString(), "Bushido");
-		values.put(TrackField.GENRE.toString(), "Deutscher Rap");
+		Map<TrackField, String> values = new HashMap<TrackField, String>();
+		values.put(TrackField.ARTIST, "Bushido");
+		values.put(TrackField.GENRE, "Deutscher Rap");
 		q.setSortAscending(Arrays.asList(false));
 		q.setSortOrder(Arrays.asList("bitrate"));
 		q.setValues(values);

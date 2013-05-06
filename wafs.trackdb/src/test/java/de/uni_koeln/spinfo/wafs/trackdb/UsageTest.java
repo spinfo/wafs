@@ -38,8 +38,8 @@ public class UsageTest {
 					query.setPageSize(10);
 					query.setExact(false);
 					query.setOr(false);
-					Map<String, String> values = new HashMap<String, String>();
-					values.put(TrackField.ARTIST.toString(), "AudioSlave");
+					Map<TrackField, String> values = new HashMap<TrackField, String>();
+					values.put(TrackField.ARTIST, "AudioSlave");
 					//values.put(TrackField.ALBUM.toString(), "dark");
 					query.setValues(values);
 					Result result = handler.search(query);
