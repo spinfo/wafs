@@ -13,6 +13,7 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -25,7 +26,7 @@ import de.uni_koeln.spinfo.wafs.fslistener.data.PersistentFile;
  * @author jhermes
  * 
  */
-
+@Ignore("TODO: Either improve performance or execute the tests in a separate profile only.")
 @Category(IntegrationTest.class)
 public class PersistentWatcherIntegrationTest {
 
