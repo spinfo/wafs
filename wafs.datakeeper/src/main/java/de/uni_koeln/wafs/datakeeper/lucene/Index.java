@@ -18,8 +18,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.MergePolicy.OneMerge;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.sandbox.queries.DuplicateFilter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
@@ -55,8 +57,8 @@ public class Index {
 		this.luceneDir = luceneDir;
 		init();
 	}
-
-	public Result search(final WAFSQuery q) throws IOException {
+	
+	public Result search(final WAFSQuery q, String distinctField) throws IOException {
 		if (reader == null)
 			return new Result(new ArrayList<Track>(), 0, 0);
 		int pageSize = q.getPageSize();
@@ -79,13 +81,36 @@ public class Index {
 			}
 			sort = new Sort(sortFields);
 		}
-
-		TopDocs topDocs = reader.getIndexSearcher().search(query, max, sort);
+		DuplicateFilter filter = null;
+		if(distinctField != null) {
+			filter = new DuplicateFilter(distinctField);
+		}
+		TopDocs topDocs = reader.getIndexSearcher().search(query, filter, max, sort);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Query: " + query + " returned " + topDocs.totalHits
 					+ " hits.");
 		}
-		return toResult(topDocs, pageSize * currentPage, q);
+		return toResult(topDocs, pageSize * currentPage, pageSize);
+	}
+
+	public Result search(final WAFSQuery q) throws IOException {
+		return search(q, null);
+	}
+	
+	public Result search(String field, String value, int startIndex, int length) throws IOException {
+		DuplicateFilter filter = new DuplicateFilter(field);
+		StandardQueryParser parser = new StandardQueryParser(analyzer);
+		try {
+			Query query = parser.parse(value, field);
+			TopDocs topDocs = reader.getIndexSearcher().search(query, filter, (startIndex+1)*length);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Query: " + query + " returned " + topDocs.totalHits
+						+ " hits.");
+			}
+			return toResult(topDocs, startIndex, length);
+		} catch (QueryNodeException e) {
+			throw new IOException("Failed to parse query", e);
+		}
 	}
 
 	private Query createQuery(WAFSQuery q) {
@@ -125,9 +150,8 @@ public class Index {
 		return null;
 	}
 
-	private Result toResult(TopDocs docs, int startIndex, WAFSQuery q)
+	private Result toResult(TopDocs docs, int startIndex, int pageSize)
 			throws IOException {
-		int pageSize = q.getPageSize();
 		List<Track> tracks = new ArrayList<Track>();
 		final ScoreDoc[] scoreDocs = docs.scoreDocs;
 		for (int i = startIndex; i < scoreDocs.length
@@ -308,6 +332,7 @@ public class Index {
 			throws IOException {
 		Document doc = new Document();
 		addFields(doc, TrackField.ALBUM, t.getAlbum());
+		addFields(doc, TrackField.ALBUM_ARTIST, t.getAlbumArtist());
 		addFields(doc, TrackField.ALBUM_ARTIST_SORT, t.getAlbumArtistSort());
 		addFields(doc, TrackField.ALBUM_SORT, t.getAlbumSort());
 		addFields(doc, TrackField.ARTIST, t.getArtist());
@@ -338,6 +363,7 @@ public class Index {
 
 	public void commit() throws IOException {
 		// Step 1: Commit all changes
+		writer.getIndexWriter().forceMerge(1);
 		writer.getIndexWriter().waitForMerges();
 		writer.getIndexWriter().commit();
 		// Step 2: Create a new file directory and copy the

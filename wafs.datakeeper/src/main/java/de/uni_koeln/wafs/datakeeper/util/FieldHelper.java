@@ -68,6 +68,7 @@ public class FieldHelper {
 	public static List<Field> populateFields(TrackField field, Object value) {
 		switch (field) {
 		case ALBUM:
+		case ALBUM_ARTIST:
 		case ALBUM_ARTIST_SORT:
 		case ALBUM_SORT:
 		case ARTIST:
@@ -77,7 +78,7 @@ public class FieldHelper {
 		case TITLE_SORT:
 			List<Field> stringFields = new ArrayList<Field>();
 			stringFields.add(new TextField(field.toString(), (String) value, Field.Store.YES));
-			stringFields.add(new StringField(field.toString()+"_exact", (String) value, Field.Store.YES));
+			stringFields.add(new StringField(field.toString()+"_exact", ((String) value).toLowerCase(), Field.Store.YES));
 			return stringFields;
 		case BPM:
 		case BITRATE:

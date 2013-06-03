@@ -77,6 +77,7 @@ public class IndexBuilder {
 		try {
 			Document doc = new Document();
 			addField(doc, TrackField.ALBUM, t.getAlbum());
+			addField(doc, TrackField.ALBUM_ARTIST, t.getAlbumArtist());
 			addField(doc, TrackField.ALBUM_ARTIST_SORT, t.getAlbumArtistSort());
 			addField(doc, TrackField.ALBUM_SORT, t.getAlbumSort());
 			addField(doc, TrackField.ARTIST, t.getArtist());
