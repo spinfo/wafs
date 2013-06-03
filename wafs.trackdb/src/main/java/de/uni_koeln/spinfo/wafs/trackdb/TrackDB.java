@@ -173,6 +173,16 @@ public class TrackDB {
 	public Result search(WAFSQuery q) throws IOException {
 		return index.search(q);
 	}
+	
+	/**
+	 * Performs a search on the {@link Index}.
+	 * @param q
+	 * @return
+	 * @throws IOException
+	 */
+	public Result search(WAFSQuery q, String distinctFieldName) throws IOException {
+		return index.search(q, distinctFieldName);
+	}
 
 	/**
 	 * Returns the {@link Track} with the given URI, or
@@ -247,6 +257,10 @@ public class TrackDB {
 	 */
 	public synchronized void update(Track track) throws IOException {
 		Mp3Writer.update(track);
+	}
+
+	public Result searchDistinct(String field, String value, int startPage, int pageSize) throws IOException {
+		return index.search(field, value, startPage, pageSize);
 	}
 
 }
