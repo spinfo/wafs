@@ -239,7 +239,11 @@ public class Mp3DirWatcher {
 							item.setArtistSort(tag.getFirst(FieldKey.ARTIST_SORT));
 							item.setAlbum(tag.getFirst(FieldKey.ALBUM));
 							item.setAlbumSort(tag.getFirst(FieldKey.ALBUM_SORT));
-							item.setAlbumArtist(tag.getFirst(FieldKey.ALBUM_ARTIST));
+							String albumArtist = tag.getFirst(FieldKey.ALBUM_ARTIST);
+							if(albumArtist == null || albumArtist.trim().length() == 0) {
+								albumArtist = item.getAlbum() + "-" + item.getArtist();
+							}
+							item.setAlbumArtist(albumArtist);
 							item.setAlbumArtistSort(tag
 									.getFirst(FieldKey.ALBUM_ARTIST_SORT));
 							item.setBPM(parseInt(tag.getFirst(FieldKey.BPM)));
@@ -263,7 +267,11 @@ public class Mp3DirWatcher {
 							item.setArtist(tag.getFirst(FieldKey.ARTIST));
 							item.setArtistSort(tag.getFirst(FieldKey.ARTIST_SORT));
 							item.setAlbum(tag.getFirst(FieldKey.ALBUM));
-							item.setAlbumArtist(tag.getFirst(FieldKey.ALBUM_ARTIST));
+							String albumArtist = tag.getFirst(FieldKey.ALBUM_ARTIST);
+							if(albumArtist == null || albumArtist.trim().length() == 0) {
+								albumArtist = item.getAlbum() + "-" + item.getArtist();
+							}
+							item.setAlbumArtist(albumArtist);
 							item.setAlbumSort(tag.getFirst(FieldKey.ALBUM_SORT));
 							item.setAlbumArtistSort(tag
 									.getFirst(FieldKey.ALBUM_ARTIST_SORT));
