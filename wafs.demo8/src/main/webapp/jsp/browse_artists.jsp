@@ -12,6 +12,22 @@
 	<div id="top">
 		<jsp:include page="/modules/header_small.jsp" />
 	</div>
+	
+	<% Result result = (Result) request.getAttribute("result"); %>
+	<% List<Track> tracks = result.getEntries(); %>
+	
+	<table>
+		<% for(Track track: tracks)  { %>
+		
+		<tr>
+			<td><%= track.getArtist()  %></td>
+		</tr>
+		
+		
+		<% } %>
+	
+	</table>
+	
 			
 
 </body>
