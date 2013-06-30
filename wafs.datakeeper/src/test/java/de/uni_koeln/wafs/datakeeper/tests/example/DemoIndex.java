@@ -67,7 +67,7 @@ public class DemoIndex {
 		track.setAlbum(document.get(ALBUM));
 		track.setTitle(document.get(TITLE));
 		track.setYear(Integer.parseInt(document.get(YEAR)));
-		track.setLocation(new URI(document.get(LOCATION)));
+		track.setLocation(document.get(LOCATION));
 		return track;
 	}
 

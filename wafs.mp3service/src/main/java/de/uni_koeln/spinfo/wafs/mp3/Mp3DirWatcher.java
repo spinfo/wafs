@@ -226,7 +226,7 @@ public class Mp3DirWatcher {
 					MP3File f = (MP3File) AudioFileIO.read(file);
 					AbstractID3Tag abstractTag = f.getID3v2Tag();
 					Track item = new Track();
-					item.setLocation(file.toURI());
+					item.setLocation(file.toURI().toString());
 					item.setLastModified(file.lastModified());
 					if (abstractTag == null) {
 						item.setTitle(file.getName());

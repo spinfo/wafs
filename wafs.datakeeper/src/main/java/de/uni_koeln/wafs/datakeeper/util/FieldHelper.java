@@ -12,6 +12,9 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.search.SortField.Type;
 
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
+
+
 public class FieldHelper {
 	
 	private static final Map<String, Type> fieldToType = new HashMap<String, Type>();

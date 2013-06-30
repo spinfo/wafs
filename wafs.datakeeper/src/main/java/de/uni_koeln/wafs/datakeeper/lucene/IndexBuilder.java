@@ -16,8 +16,8 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
 import de.uni_koeln.wafs.datakeeper.util.FieldHelper;
-import de.uni_koeln.wafs.datakeeper.util.TrackField;
 import de.uni_koeln.wafs.datakeeper.util.Logging;
 
 public class IndexBuilder {

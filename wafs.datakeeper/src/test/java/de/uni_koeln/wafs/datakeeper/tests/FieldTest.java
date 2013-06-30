@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import de.uni_koeln.wafs.datakeeper.util.TrackField;
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
 
 public class FieldTest {
 	

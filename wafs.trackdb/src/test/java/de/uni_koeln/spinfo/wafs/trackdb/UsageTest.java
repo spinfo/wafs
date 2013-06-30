@@ -15,8 +15,8 @@ import de.uni_koeln.spinfo.wafs.mp3.TrackVisitor;
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 import de.uni_koeln.spinfo.wafs.trackdb.TrackDB;
 import de.uni_koeln.wafs.datakeeper.query.Result;
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
 import de.uni_koeln.wafs.datakeeper.query.WAFSQuery;
-import de.uni_koeln.wafs.datakeeper.util.TrackField;
 
 
 public class UsageTest {

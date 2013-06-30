@@ -1,21 +1,6 @@
 package de.uni_koeln.spinfo.wafs.mp3.data;
 
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URI;
-import java.util.List;
-
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.mp3.MP3File;
-import org.jaudiotagger.tag.datatype.Artwork;
-import org.jaudiotagger.tag.id3.AbstractID3Tag;
-import org.jaudiotagger.tag.id3.ID3v1Tag;
-import org.jaudiotagger.tag.id3.ID3v22Tag;
-import org.jaudiotagger.tag.id3.ID3v23Tag;
-import org.jaudiotagger.tag.id3.ID3v24Tag;
-
-import de.uni_koeln.spinfo.wafs.mp3.Mp3Exception;
 
 /**
  * 
@@ -33,7 +18,7 @@ public class Track implements Serializable {
 
 	private int discNo, discTotal, track, trackTotal, year, length, bitRate, bpm;
 
-	private URI location;
+	private String location;
 
 	private boolean isCompilation;
 
@@ -203,11 +188,11 @@ public class Track implements Serializable {
 		this.bitRate = bitRate;
 	}
 
-	public URI getLocation() {
+	public String getLocation() {
 		return location;
 	}
 
-	public void setLocation(URI location) {
+	public void setLocation(String location) {
 		this.location = location;
 	}
 

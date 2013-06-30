@@ -36,9 +36,9 @@ import org.apache.lucene.util.Version;
 
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 import de.uni_koeln.wafs.datakeeper.query.Result;
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
 import de.uni_koeln.wafs.datakeeper.query.WAFSQuery;
 import de.uni_koeln.wafs.datakeeper.util.FieldHelper;
-import de.uni_koeln.wafs.datakeeper.util.TrackField;
 
 public class Index {
 
@@ -200,21 +200,18 @@ public class Index {
 		if (lastModified != null)
 			t.setLastModified(Long.parseLong(lastModified));
 		String uri = doc.get(TrackField.LOCATION + "_exact".toString());
-		if (uri != null) {
-			try {
-				t.setLocation(new URI(uri));
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-		}
+		t.setLocation(uri);
 		return t;
 	}
 
 	public void update(Set<Track> tracks) throws IOException {
 		if (tracks == null || tracks.size() <= 0)
 			return;
-		URI[] toRemove = new URI[tracks.size()];
-		tracks.toArray(toRemove);
+		String[] toRemove = new String[tracks.size()];
+		int i = 0;
+		for (Track track : tracks) {
+			toRemove[i++] = track.getLocation();
+		}
 		remove(toRemove);
 		for (Track t : tracks) {
 			Document doc = createDoc(t);
@@ -269,7 +266,7 @@ public class Index {
 		return toTrack(reader.getIndexSearcher().doc(scoreDoc.doc));
 	}
 
-	public void remove(final URI... locations) throws IOException {
+	public void remove(final String... locations) throws IOException {
 		Term[] terms = new Term[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			terms[i] = new Term(TrackField.LOCATION.toString() + "_exact",

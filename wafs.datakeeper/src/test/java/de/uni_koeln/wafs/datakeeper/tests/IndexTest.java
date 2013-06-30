@@ -14,9 +14,9 @@ import org.junit.Test;
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 import de.uni_koeln.wafs.datakeeper.lucene.Index;
 import de.uni_koeln.wafs.datakeeper.query.Result;
+import de.uni_koeln.wafs.datakeeper.query.TrackField;
 import de.uni_koeln.wafs.datakeeper.query.WAFSQuery;
 import de.uni_koeln.wafs.datakeeper.util.Configuration;
-import de.uni_koeln.wafs.datakeeper.util.TrackField;
 
 public class IndexTest {
 

@@ -73,7 +73,7 @@ public class DummyTrackGenerator {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(data);
 			fos.close();
-			track.setLocation(file.toURI());
+			track.setLocation(file.toURI().toString());
 			Mp3Writer.update(track);
 		}
 		Marshaller marshaller = ctx.createMarshaller();

@@ -92,7 +92,7 @@ public class TrackDB {
 			try {
 				synchronized(writeLock) {
 					logger.debug("Removing file " + file.toURI());
-					index.remove(file.toURI());
+					index.remove(file.toURI().toString());
 					indexModified++;
 				}
 			} catch (IOException e) {

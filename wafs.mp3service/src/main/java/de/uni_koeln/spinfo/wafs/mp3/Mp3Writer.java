@@ -2,6 +2,8 @@ package de.uni_koeln.spinfo.wafs.mp3;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -23,11 +25,13 @@ public class Mp3Writer {
 	 * <strong>Currently untested - use with caution!</strong>
 	 * @param track
 	 * @throws IOException
+	 * @throws  
 	 */
-	public static void update(Track track) throws IOException {
-		File file = new File(track.getLocation());
-		if(!file.exists()) throw new IOException("The track does not exist");
+	public static void update(Track track) throws IOException  {
+		
 		try {
+			File file = new File(new URI(track.getLocation()));
+			if(!file.exists()) throw new IOException("The track does not exist");
 			AudioFile f = AudioFileIO.read(file);
 			Tag tag = f.getTag();
 			setIfNotNull(tag, FieldKey.ALBUM, track.getAlbum());
@@ -52,7 +56,7 @@ public class Mp3Writer {
 			f.commit();
 		} catch (KeyNotFoundException
 				| CannotReadException | TagException | ReadOnlyFileException
-				| InvalidAudioFrameException | CannotWriteException e) {
+				| InvalidAudioFrameException | URISyntaxException | CannotWriteException e) {
 			throw new IOException("Failed to update track", e);
 		}
 

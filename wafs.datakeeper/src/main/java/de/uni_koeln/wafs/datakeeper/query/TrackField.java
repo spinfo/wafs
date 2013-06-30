@@ -1,4 +1,4 @@
-package de.uni_koeln.wafs.datakeeper.util;
+package de.uni_koeln.wafs.datakeeper.query;
 
 public enum TrackField {
 	ARTIST, ALBUM, GENRE, TITLE, LAST_MODIFIED, YEAR, LENGTH, BITRATE, LOCATION, 
