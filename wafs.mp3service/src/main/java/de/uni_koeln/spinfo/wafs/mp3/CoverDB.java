@@ -11,6 +11,7 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 
 import de.uni_koeln.spinfo.wafs.mp3.data.Track;
+import de.uni_koeln.spinfo.wafs.mp3.util.ArtworkHelper;
 import de.uni_koeln.spinfo.wafs.mp3.util.MurmurHash;
 
 public class CoverDB {
@@ -33,7 +34,7 @@ public class CoverDB {
 					&& coverFile.lastModified() >= track.getLastModified()) {
 				return new BufferedInputStream(new FileInputStream(coverFile));
 			}
-			InputStream src = track.getImage();
+			InputStream src = ArtworkHelper.getImage(track);
 			if (src == null)
 				throw new NoImageAvailableException();
 			copy(src, coverFile);
@@ -65,7 +66,7 @@ public class CoverDB {
 			return;
 		}
 		try {
-			InputStream src = track.getImage();
+			InputStream src = ArtworkHelper.getImage(track);
 			if (src == null)
 				throw new NoImageAvailableException();
 			copy(src, coverFile);

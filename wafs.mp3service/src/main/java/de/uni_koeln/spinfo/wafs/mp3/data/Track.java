@@ -1,7 +1,5 @@
 package de.uni_koeln.spinfo.wafs.mp3.data;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
@@ -247,55 +245,6 @@ public class Track implements Serializable {
 
 	public void setMusicBrainzArtistID(String musicBrainzArtistID) {
 		this.musicBrainzArtistID = musicBrainzArtistID;
-	}
-
-	public InputStream getImage() throws Mp3Exception {
-		try {
-			File file = new File(location);
-			AudioFile readFile = AudioFileIO.read(file);
-			if (readFile instanceof MP3File) {
-				MP3File f = (MP3File) AudioFileIO.read(file);
-				AbstractID3Tag tag = f.getID3v2Tag();
-				if (tag == null)
-					tag = f.getID3v1Tag();
-				ByteArrayInputStream imageData = getArtWork(tag);
-				return imageData;
-			}
-		} catch (Exception e) {
-			throw new Mp3Exception(e);
-		}
-		return null;
-
-	}
-
-	private ByteArrayInputStream getArtWork(AbstractID3Tag tag)
-			throws Mp3Exception {
-		try {
-			List<Artwork> artworkList = null;
-			if (tag instanceof ID3v1Tag) {
-				artworkList = ((ID3v1Tag) tag).getArtworkList();
-			}
-			if (tag instanceof ID3v22Tag) {
-				artworkList = ((ID3v22Tag) tag).getArtworkList();
-			}
-			if (tag instanceof ID3v23Tag) {
-				artworkList = ((ID3v23Tag) tag).getArtworkList();
-			}
-			if (tag instanceof ID3v24Tag) {
-				artworkList = ((ID3v24Tag) tag).getArtworkList();
-			}
-			for (Artwork artwork : artworkList) {
-				if (artwork == null)
-					continue;
-				byte[] bytes = artwork.getBinaryData();
-				if (bytes == null)
-					continue;
-				return new ByteArrayInputStream(bytes);
-			}
-			return null;
-		} catch (Exception e) {
-			return null;
-		}
 	}
 
 
