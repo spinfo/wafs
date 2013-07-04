@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+ xsi:schemaLocation="http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/aop    
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+ 	
+ 	<!-- Tell Spring to use Services etc which are defined through annotations -->
+	<context:annotation-config ></context:annotation-config>
+
+	<!-- Tell Spring to scan all classes in this package (including subpackages) -->
+	<context:component-scan base-package="de.uni_koeln.spinfo" />
+
+	<!-- This bean is responsible for mapping GWT calls to Spring Services -->
+	<bean class="org.gwtwidgets.server.spring.GWTHandler">
+		<property name="mappings">
+			<map>
+				<!-- Add new services here: -->
+				<!-- Key as defined in the service interface -->
+				<!-- @RemoteServiceRelativePath(prefix/KEY) -->
+				<!-- Value as defined in the service implementation -->
+				<entry key="/music" value-ref="musicService" />
+
+			</map>
+		</property>
+	</bean>
+	
+
+</beans>
+

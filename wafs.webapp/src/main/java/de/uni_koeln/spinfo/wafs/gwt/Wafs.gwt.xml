@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='de.uni_koeln.spinfo.wafs.Wafs'>
+  
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+  
+  <inherits name='com.google.gwt.user.User' />
+  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+  <inherits name="com.google.gwt.http.HTTP" />
+  <inherits name='de.uni_koeln.spinfo.wafs.mp3.Mp3' />
+  <inherits name='de.uni_koeln.wafs.datakeeper.Datakeeper'/>
+  
+  <inherits name="com.github.gwtbootstrap.Bootstrap" />
+
+  <!-- Other module inherits                                      -->
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='de.uni_koeln.spinfo.wafs.gwt.client.Wafs'/>
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client'/>
+  <source path='shared'/>
+
+  
+</module>

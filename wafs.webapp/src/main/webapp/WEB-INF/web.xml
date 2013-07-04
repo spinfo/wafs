@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+
+	 <servlet>
+		<servlet-name>wafs</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>wafs</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
+	 
+	 <welcome-file-list>
+    	<welcome-file>jsp/index.jsp</welcome-file>
+  	</welcome-file-list>
+	
+	<!-- Front Controller for all GWT-Spring based servlets -->
+	<servlet>
+		<servlet-name>gwt</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<!-- Don't forget to declare a gwt-servlet.xml -->
+	<servlet-mapping>
+		<servlet-name>gwt</servlet-name>
+		<url-pattern>de.uni_koeln.spinfo.wafs.Wafs/rpc/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>remoteLogging</servlet-name>
+		<servlet-class>de.uni_koeln.spinfo.wafs.gwt.server.WafsRemoteLoggingService</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>remoteLogging</servlet-name>
+		<url-pattern>de.uni_koeln.spinfo.wafs.Wafs/remote_logging</url-pattern>
+	</servlet-mapping>
+	
+	
+</web-app>
