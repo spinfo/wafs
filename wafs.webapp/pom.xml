@@ -1,0 +1,238 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>wafs</groupId>
+  <artifactId>webapp</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+  
+	<properties>
+		<!-- general properties -->
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<spring.version>3.1.3.RELEASE</spring.version>
+		<gwt.version>2.5.1</gwt.version>
+		<wafs.webapp.build>../wafs.webapp/target</wafs.webapp.build>
+		<wafs.webapp.name>webapp-${project.version}</wafs.webapp.name>
+		<jetty.default.port>8080</jetty.default.port>
+		<jetty.version>9.0.1.v20130408</jetty.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- Servlet definition -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.uni_koeln.spinfo.wafs</groupId>
+			<artifactId>trackdb</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		
+		<!-- Required to annotate Spring Controllers with "@PostConstruct" -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+			<optional>false</optional>
+		</dependency>
+
+
+		<dependency>
+			<!-- Required indirect dependency -->
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		
+		<!-- GWT -->
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- GWT-Spring -->
+		<!-- Required to implement GWT Services as Spring Beans -->
+		<dependency>
+			<groupId>net.sf.gwt-widget</groupId>
+			<artifactId>gwt-sl</artifactId>
+			<version>1.3-RC1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.gwtbootstrap</groupId>
+			<artifactId>gwt-bootstrap</artifactId>
+			<version>2.2.1.0</version>
+		</dependency>
+		
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+					<configuration>
+
+						<contextXml>jetty-context.xml</contextXml>
+						<webAppConfig>
+							<!-- <contextPath>${maalr.webapp.build}</contextPath> -->
+							<baseResource
+								implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${wafs.webapp.build}/${wafs.webapp.name}</resourcesAsCSV>
+							</baseResource>
+							<descriptor>${wafs.webapp.build}/${wafs.webapp.name}/WEB-INF/web.xml</descriptor>
+						</webAppConfig>
+						<classesDirectory>${wafs.webapp.build}/${wafs.webapp.name}/WEB-INF/classes</classesDirectory>
+						<systemProperties>
+							<systemProperty>
+								<name>jetty.port</name>
+								<value>${jetty.default.port}</value>
+							</systemProperty>
+						</systemProperties>
+					</configuration>
+				</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.version}</version>
+				<configuration>
+					<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
+					<compileReport>true</compileReport>
+					<draftCompile>${gwt.draft-compile}</draftCompile>
+					<style>${gwt.style}</style>
+					<optimizationLevel>${gwt.optimizationlevel}</optimizationLevel>
+					<runTarget>index.jsp</runTarget>
+					<localWorkers>4</localWorkers>
+					<extraJvmArgs>-Xmx1G</extraJvmArgs>
+					<enableClosureCompiler>${gwt.enableclosurecompiler}</enableClosureCompiler>
+					<compileSourcesArtifacts>
+						<compileSourcesArtifact>de.uni_koeln.spinfo.wafs:mp3service</compileSourcesArtifact>
+						<compileSourcesArtifact>de.uni_koeln.spinfo.wafs:datakeeper</compileSourcesArtifact>
+					</compileSourcesArtifacts>
+					<modules>
+						<module>de.uni_koeln.spinfo.wafs.gwt.Wafs${gwt.module.suffix}</module>
+					</modules>
+				</configuration>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.gwt.xml</include>
+				</includes>
+			</resource>
+		</resources>
+		
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>gwt-dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<!-- GWT options -->
+				<gwt.draft-compile>true</gwt.draft-compile>
+				<!-- one of obfuscated, pretty, and detailed -->
+				<gwt.style>pretty</gwt.style>
+				<!-- Value between 1 and 9 -->
+				<gwt.optimizationlevel>1</gwt.optimizationlevel>
+				<gwt.module.suffix>Dev</gwt.module.suffix>
+			</properties>
+
+		</profile>
+
+		<profile>
+			<id>gwt-prod</id>
+			<properties>
+				<!-- GWT options -->
+				<gwt.draft-compile>false</gwt.draft-compile>
+				<!-- one of obfuscated, pretty, and detailed -->
+				<gwt.style>obfuscated</gwt.style>
+				<!-- Value between 1 and 9 -->
+				<gwt.optimizationlevel>9</gwt.optimizationlevel>
+				<gwt.module.suffix></gwt.module.suffix>
+			</properties>
+
+		</profile>
+	
+	</profiles>
+  
+</project>

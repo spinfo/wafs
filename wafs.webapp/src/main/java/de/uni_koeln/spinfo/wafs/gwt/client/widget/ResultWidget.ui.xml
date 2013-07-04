@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:b="urn:import:com.github.gwtbootstrap.client.ui">
+	<ui:style>
+		.important {
+			font-weight: bold;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<b:Form ui:field="form">
+			<b:TextBox ui:field="searchField" placeholder="Album.." />
+			<b:Button styleName="{style.important}" ui:field="submitButton" />
+		</b:Form>
+		<g:VerticalPanel ui:field="panel"></g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 
