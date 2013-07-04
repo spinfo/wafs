@@ -3,6 +3,8 @@ package de.uni_koeln.spinfo.wafs.mp3.util;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.jaudiotagger.audio.AudioFile;
@@ -23,7 +25,7 @@ public class ArtworkHelper {
 
 	public static InputStream getImage(Track track) throws Mp3Exception {
 		try {
-			File file = new File(track.getLocation());
+			File file = new File(track.getLocation().substring(5));
 			AudioFile readFile = AudioFileIO.read(file);
 			if (readFile instanceof MP3File) {
 				MP3File f = (MP3File) AudioFileIO.read(file);
@@ -34,6 +36,7 @@ public class ArtworkHelper {
 				return imageData;
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new Mp3Exception(e);
 		}
 		return null;
@@ -66,6 +69,7 @@ public class ArtworkHelper {
 			}
 			return null;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

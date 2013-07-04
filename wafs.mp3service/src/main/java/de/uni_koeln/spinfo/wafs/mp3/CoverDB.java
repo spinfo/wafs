@@ -30,11 +30,13 @@ public class CoverDB {
 			String fileName = track.getArtist()+"_"+track.getAlbum()
 					+ ".png";
 			File coverFile = new File(dir, fileName);
+			logger.info("Cover file: " + coverFile.getAbsolutePath());
 			if (coverFile.exists()
 					&& coverFile.lastModified() >= track.getLastModified()) {
 				return new BufferedInputStream(new FileInputStream(coverFile));
 			}
 			InputStream src = ArtworkHelper.getImage(track);
+			logger.info("Extracted image: " + src);
 			if (src == null)
 				throw new NoImageAvailableException();
 			copy(src, coverFile);
@@ -45,6 +47,7 @@ public class CoverDB {
 	}
 
 	private void copy(InputStream src, File dest) throws IOException {
+		dest.getParentFile().mkdirs();
 		BufferedOutputStream out = new BufferedOutputStream(
 				new FileOutputStream(dest));
 		byte[] buffer = new byte[1024];
