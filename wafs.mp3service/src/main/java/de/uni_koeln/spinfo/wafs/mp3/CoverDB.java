@@ -27,7 +27,7 @@ public class CoverDB {
 	public BufferedInputStream getCover(Track track) throws NoImageAvailableException {
 		// FIXME: Not always png..., can also be jpeg
 		try {
-			String fileName = MurmurHash.hash64(track.getLocation().toString())
+			String fileName = track.getArtist()+"_"+track.getAlbum()
 					+ ".png";
 			File coverFile = new File(dir, fileName);
 			if (coverFile.exists()
