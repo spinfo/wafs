@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>datakeeper</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<parent>
 		<relativePath>../wafs.parent</relativePath>
 		<groupId>de.uni_koeln.spinfo.wafs</groupId>
@@ -68,8 +68,8 @@
 			<version>${lucene.version}</version>
 		</dependency>
 	</dependencies>
-	
-		<build>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -85,9 +85,25 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<!-- Create a jar of the test classes and resources, to make them
+				     reusable in other modules. Helpful as it contains the code to
+				     generate dummy tracks for testing purpose. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	
+
 
 </project>
 
