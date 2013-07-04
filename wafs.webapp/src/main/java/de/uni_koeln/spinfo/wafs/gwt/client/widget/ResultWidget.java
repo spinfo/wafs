@@ -115,10 +115,17 @@ public class ResultWidget extends Composite {
 			tdw.setTrackTitle(track.getTitle());
 			tdw.setArtist(track.getArtist());
 			tdw.setBitrate(track.getBitRate());
+			tdw.setImage(getUrl(track));
 			tn.add(tdw);
 			tns.add(tn);
 		}
 		panel.add(tns);
 	}
+
+	private String getUrl(Track track) {
+		return GWT.getHostPageBaseURL()+"image.htm?artist=" + track.getArtist()+"&album="+track.getAlbum()+"&location="+track.getLocation(); 
+	}
+	
+	
 
 }

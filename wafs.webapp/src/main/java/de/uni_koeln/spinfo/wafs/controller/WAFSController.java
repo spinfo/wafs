@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import de.uni_koeln.spinfo.wafs.WAFSInitializer;
+import de.uni_koeln.spinfo.wafs.mp3.NoImageAvailableException;
+import de.uni_koeln.spinfo.wafs.mp3.data.Track;
 import de.uni_koeln.wafs.datakeeper.query.Result;
 import de.uni_koeln.wafs.datakeeper.query.WAFSQuery;
 
@@ -61,6 +64,26 @@ public class WAFSController {
 		  }
 		  buf.close();
 	}
+	
+
+	@RequestMapping("/image")
+	public void getImage(Track track, HttpServletResponse response) throws IOException {
+		  response.setContentType("image/png"); 
+		  InputStream cover;
+		try {
+			cover = dbManager.getCover(track);
+		} catch (NoImageAvailableException e) {
+			logger.info("No cover found for track " + track);
+			return;
+		}
+		  BufferedInputStream buf = new BufferedInputStream(cover);
+		  int readBytes = 0;
+		  while ((readBytes = buf.read()) != -1) {
+		    response.getOutputStream().write(readBytes);
+		  }
+		  buf.close();
+	}
+	
 	
 		
 	@RequestMapping("/search3")
